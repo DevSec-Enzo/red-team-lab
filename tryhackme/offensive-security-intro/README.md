@@ -1,186 +1,106 @@
-TryHackMe — Offensive Security Intro
+# Offensive Security Intro — TryHackMe Writeup
 
-1 - Overview
+![Level](https://img.shields.io/badge/Level-Beginner-brightgreen)
+![Category](https://img.shields.io/badge/Category-Web%20%2F%20Offensive%20Security-blue)
+![Platform](https://img.shields.io/badge/Platform-TryHackMe-red)
 
-Platform: TryHackMe
-Room: Offensive Security Intro
-Category: Offensive Security / Web
-Difficulty: Beginner
+🔗 **Sala:** [tryhackme.com/room/offensivesecurityintro](https://tryhackme.com/room/offensivesecurityintro)
 
-Objective
+## 📋 Visão Geral
 
-Identify and exploit a vulnerability in the simulated FakeBank web application.
+**Objetivo:** Identificar e explorar uma vulnerabilidade na aplicação web simulada FakeBank.
 
----
+**Alvo:** `http://fakebank.thm`
 
-2 - Target
+Todas as atividades foram realizadas exclusivamente dentro do ambiente de laboratório autorizado do TryHackMe.
 
-Target application:
+## 🔍 Reconhecimento
 
-http://fakebank.thm
+O primeiro passo foi identificar recursos disponíveis na aplicação web alvo, utilizando a ferramenta **DIRB** para enumeração de diretórios.
 
-All activities were performed exclusively within the authorized TryHackMe laboratory environment.
-
----
-
-3 - Reconnaissance
-
-The first step was to identify resources available on the target web application.
-
-The tool DIRB was used to perform directory enumeration.
-
-Command
-
+```bash
 dirb http://fakebank.thm
+```
 
-Result
+A enumeração identificou os seguintes recursos:
 
-The enumeration identified the following resources:
+- `http://fakebank.thm/bank-transfer`
+- `http://fakebank.thm/image`
 
-http://fakebank.thm/bank-transfer
-http://fakebank.thm/image
+📸 ![dirb](screenshots/01-dirb.jpeg)
 
-Evidence
+## 🕵️ Enumeração
 
-screenshots/01-dirb.jpeg
+O endpoint `/bank-transfer` foi investigado por seu nome indicar uma função financeira potencialmente sensível.
 
----
+O endpoint expôs um **Admin Portal** contendo funcionalidade para realizar transferências bancárias, sem qualquer controle de autenticação visível.
 
-4 - Endpoint Analysis
+📸 ![bank-transfer](screenshots/03-bank-transfer.jpeg)
 
-The "/bank-transfer" endpoint was investigated because its name indicated a potentially sensitive financial function.
+## 💥 Exploração
 
-URL:
+A aplicação exibia inicialmente um saldo negativo na conta: `-$1,232.32`.
 
-http://fakebank.thm/bank-transfer
+A funcionalidade administrativa descoberta permitiu a criação de uma transferência. Foi realizada uma transferência de `$5,000.00` para a própria conta, dentro do ambiente do laboratório.
 
-The endpoint exposed an Admin Portal containing functionality for performing bank transfers.
+A aplicação aceitou a operação e o saldo foi modificado.
 
-Evidence
+> ⚠️ O saldo exibido na interface não refletiu a mudança imediatamente — provavelmente um bug da própria aplicação de simulação, não relacionado à exploração em si.
 
-screenshots/03-bank-transfer.jpeg
+## 💣 Impacto
 
----
+Em uma aplicação real, o acesso não autorizado a uma função de transferência financeira poderia resultar em:
 
-5 - Exploitation
+- Transações não autorizadas
+- Perda financeira
+- Alteração de registros financeiros
+- Comprometimento da integridade dos dados
 
-The application initially displayed a negative account balance:
+## 🔗 Cadeia de Ataque
 
--$1,232.32
-
-The discovered administrative functionality allowed a transfer to be created.
-
-A transfer of:
-
-$5,000.00
-
-was performed to my own account within the laboratory.
-
-The application accepted the operation and the account balance was modified.
-
-Evidence
-
-The platform hasn't updated; it's probably a bug.
-
----
-
-6 - Attack Chain
-
-The complete attack path was:
-
-Directory Enumeration
+```
+Enumeração de diretórios
         ↓
-Endpoint Discovery
+Descoberta de endpoint
         ↓
 /bank-transfer
         ↓
 Admin Portal
         ↓
-Transfer Functionality
+Funcionalidade de transferência
         ↓
-Successful Transaction
+Transação bem-sucedida
+```
+
+## 🛡️ Mitigação
+
+- Autenticação forte para funções administrativas
+- Autorização adequada e controle de acesso baseado em papéis (RBAC)
+- Validação server-side de operações financeiras
+- Restrição de acesso a endpoints administrativos
+- Registro e monitoramento de transações sensíveis
+- Separação entre funcionalidades administrativas e de usuário comum
+
+> Ocultar uma URL administrativa não é, por si só, um controle de segurança.
+
+## 📚 Aprendizados
+
+- Superfície de ataque pode ser descoberta por enumeração de diretórios, mesmo sem estar visível na interface
+- Funcionalidades administrativas expostas sem controle de acesso representam risco crítico
+- Controle de acesso é tão importante quanto a autenticação
+
+## ✅ Conclusão
+
+Esta sala apresentou o fluxo básico de uma avaliação de segurança web: reconhecimento → enumeração → descoberta → exploração → impacto → mitigação.
+
+A principal lição foi que funcionalidades não expostas na interface visível de uma aplicação ainda podem estar acessíveis através de endpoints diretamente descobertos.
+
+## 🧰 Ferramentas
+
+| Ferramenta | Finalidade |
+|---|---|
+| DIRB | Enumeração de diretórios e recursos |
+| Navegador | Análise e interação com a aplicação |
+| Terminal | Execução de comandos |
 
 ---
-
-7 - Security Analysis
-
-The exercise demonstrates the importance of properly protecting administrative functionality.
-
-The administrative endpoint was discoverable through directory enumeration and exposed functionality capable of modifying financial data.
-
-The key security concepts demonstrated were:
-
--Attack surface discovery
--Directory enumeration
--Endpoint discovery
--Administrative functionality exposure
--Access control
--Impact analysis
-
----
-
-8 - Impact
-
-In a real-world application, unauthorized access to a financial transfer function could potentially result in:
-
--Unauthorized transactions
--Financial loss
--Modification of financial records
--Compromise of data integrity
-
-The activity described in this write-up was limited to the authorized TryHackMe laboratory.
-
----
-
-9 - Mitigation
-
-Potential security controls include:
-
--Strong authentication for administrative functions
--Proper authorization and role-based access control
--Server-side validation of financial operations
--Restriction of administrative endpoints
--Logging and monitoring of sensitive transactions
--Separation of administrative and standard user functionality
-
-Hiding an administrative URL is not, by itself, a security control.
-
----
-
-10 - Lessons Learned
-
-This room introduced the basic workflow of a web security assessment:
-
-Reconnaissance
-      ↓
-Enumeration
-      ↓
-Discovery
-      ↓
-Analysis
-      ↓
-Exploitation
-      ↓
-Impact
-      ↓
-Mitigation
-
-The main lesson was that functionality not exposed through the application's visible interface may still be accessible through directly discoverable endpoints.
-
----
-
-11 - Tools
-
-| Tool     | Purpose                              |
-| -------- | ------------------------------------ |
-| DIRB     | Directory and resource enumeration   |
-| Browser  | Application analysis and interaction |
-| Terminal | Command execution                    |
-
----
-
-12 - Status
-
-Room completed.
-
-This write-up documents the methodology, commands, findings, evidence, impact, and security considerations observed during the laboratory exercise.
