@@ -35,9 +35,7 @@ Comecei entrando nas páginas do menu lateral esquerdo. A mais interessante, e, 
 
 Testei um usuário e uma senha aleatórios para verificar se dava algum erro.
 
-![login_test](screenshots/login_test.png)
-
-A mensagem apenas indicava que o login estava incorreto.
+A mensagem apenas indicou que o login estava incorreto.
 
 ## 🕵️ Enumeração
 
